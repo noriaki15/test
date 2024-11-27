@@ -7,8 +7,16 @@
 </head>
 <body style="margin: 0; overflow: hidden;">
     <a-scene embedded arjs>
+        <a-assets>
+            <a-asset-item id="my-model" src="yamadakkkkkkkkk.gltf"></a-asset-item>
+        </a-assets>
         <a-marker preset="hiro">
-            <a-plane src="yamadakkkkkkkkk.3ds" position="0 0 -0.05" rotation="-90 30 0" width="1" height="1"></a-plane>
+            <a-entity 
+                gltf-model="#my-model"
+                scale="0.5 0.5 0.5"
+                position="0 0 0"
+                rotation="0 0 0"
+            ></a-entity>
         </a-marker>
         <a-entity camera></a-entity>
     </a-scene>
