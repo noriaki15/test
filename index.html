@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>AR.js with GLTF Model</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.min.js"></script>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
+<body>
+    <a-scene 
+        embedded 
+        arjs='sourceType: webcam; debugUIEnabled: false;' 
+        vr-mode-ui="enabled: false"
+    >
         <a-assets>
-            <a-asset-item id="my-model" src="yamadakkkkkkkkk.gltf"></a-asset-item>
+            <a-asset-item 
+                id="3d-model" 
+                src="yamadakkkkkkkkk.gltf"
+            ></a-asset-item>
         </a-assets>
         <a-marker preset="hiro">
             <a-entity 
-                gltf-model="#my-model"
+                gltf-model="#3d-model"
                 scale="0.5 0.5 0.5"
                 position="0 0 0"
                 rotation="0 0 0"
