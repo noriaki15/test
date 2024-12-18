@@ -18,22 +18,26 @@
         </a-marker>
 
         <!-- 마커가 사라진 후에도 객체를 고정된 위치에 유지하도록 설정 -->
-        <a-entity id="characterFixed" position="2 2 0" rotation="0 0 0" scale="1 1 1" 
+        <a-entity id="characterFixed" position="2 2 0" rotation="-45 0 0" scale="1 1 1" 
                   gltf-model="orio.gltf" visible="false">
         </a-entity>
 
         <!-- 카메라 설정 -->
-        <a-entity camera orbit-controls="auto-rotate: true; enable-drag: true; target: #characterFixed"></a-entity>
+        <a-entity id="camera" camera orbit-controls="auto-rotate: true; enable-drag: true;">
+        </a-entity>
     </a-scene>
 
     <script>
         // 마커를 인식했을 때 객체를 고정된 위치에 유지하기 위한 JavaScript 코드
         const marker = document.querySelector('#marker1');
         const characterFixed = document.querySelector('#characterFixed');
+        const camera = document.querySelector('#camera');
 
         marker.addEventListener('markerLost', function () {
             // 마커가 사라지면 객체를 고정된 위치에 보여주고, 마커는 숨김
             characterFixed.setAttribute('visible', 'true');
+            // 카메라의 타겟을 고정된 캐릭터로 설정
+            camera.setAttribute('orbit-controls', 'target: #characterFixed');
         });
 
         marker.addEventListener('markerFound', function () {
