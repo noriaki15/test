@@ -9,18 +9,15 @@
 </head>
 <body style="margin: 0; overflow: hidden;">
     <a-scene embedded arjs>
-        <!-- マーカー認識後に表示される3Dモデル -->
         <a-marker preset="hiro" id="marker1">
-            <a-entity id="character" position="0 0.5 0" rotation="-45 0 0" scale="1 1 1" 
+            <a-entity id="character" position="0 0.5 0" rotation="-90 0 0" scale="1 1 1" 
                       gltf-model="orio.gltf"></a-entity>
         </a-marker>
 
-        <!-- マーカーが見失われた後に表示される固定されたキャラクター -->
-        <a-entity id="characterFixed" position="0 0 0" rotation="-45 0 0" scale="1 1 1" 
+        <a-entity id="characterFixed" position="0 0 0" rotation="0 0 0" scale="1 1 1" 
                   gltf-model="orio.gltf" visible="false">
         </a-entity>
 
-        <!-- カメラ設定 -->
         <a-entity id="camera" camera orbit-controls="auto-rotate: true; enable-drag: true;">
         </a-entity>
     </a-scene>
@@ -31,12 +28,11 @@
         const camera = document.querySelector('#camera');
 
         marker.addEventListener('markerLost', function () {
-            // マーカーが失われた場合にキャラクターを後ろ3mに移動させる
             const cameraPosition = camera.getAttribute('position');
             const newPosition = {
                 x: cameraPosition.x, 
                 y: cameraPosition.y, 
-                z: cameraPosition.z + 3  // 後ろ3mにキャラクターを配置
+                z: cameraPosition.z + 3
             };
 
             characterFixed.setAttribute('position', newPosition);
@@ -44,7 +40,6 @@
         });
 
         marker.addEventListener('markerFound', function () {
-            // マーカーが見つかった場合にはキャラクターを隠す
             characterFixed.setAttribute('visible', 'false');
         });
     </script>
