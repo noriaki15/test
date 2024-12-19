@@ -9,38 +9,42 @@
 </head>
 <body style="margin: 0; overflow: hidden;">
     <a-scene embedded arjs>
-        <!-- 마커 인식 후 3D 모델을 고정된 위치에 배치 -->
+        <!-- マーカー認識後に表示される3Dモデル -->
         <a-marker preset="hiro" id="marker1">
             <a-entity id="character" position="0 0.5 0" rotation="-45 0 0" scale="1 1 1" 
-                      gltf-model="orio.gltf" 
-            </a-entity>
+                      gltf-model="orio.gltf"></a-entity>
         </a-marker>
 
-        <!-- 마커가 사라진 후에도 객체를 고정된 위치에 유지하도록 설정 -->
-        <a-entity id="characterFixed" position="1 0 1" rotation="-45 0 0" scale="1 1 1" 
+        <!-- マーカーが見失われた後に表示される固定されたキャラクター -->
+        <a-entity id="characterFixed" position="0 0 0" rotation="-45 0 0" scale="1 1 1" 
                   gltf-model="orio.gltf" visible="false">
         </a-entity>
 
-        <!-- 카메라 설정 -->
+        <!-- カメラ設定 -->
         <a-entity id="camera" camera orbit-controls="auto-rotate: true; enable-drag: true;">
         </a-entity>
     </a-scene>
 
     <script>
-        // 마커를 인식했을 때 객체를 고정된 위치에 유지하기 위한 JavaScript 코드
         const marker = document.querySelector('#marker1');
         const characterFixed = document.querySelector('#characterFixed');
         const camera = document.querySelector('#camera');
 
         marker.addEventListener('markerLost', function () {
-            // 마커가 사라지면 객체를 고정된 위치에 보여주고, 마커는 숨김
+            // マーカーが失われた場合にキャラクターを後ろ3mに移動させる
+            const cameraPosition = camera.getAttribute('position');
+            const newPosition = {
+                x: cameraPosition.x, 
+                y: cameraPosition.y, 
+                z: cameraPosition.z + 3  // 後ろ3mにキャラクターを配置
+            };
+
+            characterFixed.setAttribute('position', newPosition);
             characterFixed.setAttribute('visible', 'true');
-            // 카메라의 타겟을 고정된 캐릭터로 설정
-            camera.setAttribute('orbit-controls', 'target: #characterFixed');
         });
 
         marker.addEventListener('markerFound', function () {
-            // 마커를 인식하면 고정된 객체는 숨기고, 마커의 객체를 표시
+            // マーカーが見つかった場合にはキャラクターを隠す
             characterFixed.setAttribute('visible', 'false');
         });
     </script>
