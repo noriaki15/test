@@ -5,72 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aframe/1.2.0/aframe.min.js"></script>
-    <script>
-        AFRAME.registerComponent('marker-handler', {
-            init: function() {
-                this.markers = [];
-                this.markerVisible = false;
-                
-                this.el.addEventListener('markerFound', () => {
-                    this.markerVisible = true;
-                    // 마커가 처음 발견되었을 때 위치 저장
-                    if (this.markers.length === 0) {
-                        const markerEl = this.el;
-                        const worldPosition = new THREE.Vector3();
-                        const worldRotation = new THREE.Quaternion();
-                        markerEl.object3D.getWorldPosition(worldPosition);
-                        markerEl.object3D.getWorldQuaternion(worldRotation);
-                        
-                        this.markers.push({
-                            position: worldPosition,
-                            rotation: worldRotation
-                        });
-                        
-                        // 모든 3D 객체들의 위치를 월드 좌표로 변환
-                        const objects = markerEl.querySelectorAll('.ar-object');
-                        objects.forEach(obj => {
-                            obj.setAttribute('visible', 'true');
-                            obj.object3D.position.copy(obj.getAttribute('position'));
-                            obj.object3D.position.add(worldPosition);
-                        });
-                    }
-                });
-                
-                this.el.addEventListener('markerLost', () => {
-                    this.markerVisible = false;
-                    // 마커가 사라져도 객체들은 계속 표시
-                    const objects = this.el.querySelectorAll('.ar-object');
-                    objects.forEach(obj => {
-                        obj.setAttribute('visible', 'true');
-                    });
-                });
-            }
-        });
-    </script>
+    <style>
+        .arjs-loader {
+            position: fixed;
+            z-index: 999;
+            overflow: show;
+            margin: auto;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .arjs-loader div {
+            text-align: center;
+            font-size: 1.25em;
+            color: white;
+        }
+    </style>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
-        <!-- 캐릭터 에셋 정의 -->
+    <!-- 로딩 인디케이터 -->
+    <div class="arjs-loader">
+        <div>카메라 로딩 중... 카메라 권한을 허용해주세요.</div>
+    </div>
+
+    <a-scene 
+        vr-mode-ui="enabled: false;"
+        renderer="logarithmicDepthBuffer: true;"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
+
         <a-assets>
             <a-asset-item id="character" src="/api/placeholder/100/100"></a-asset-item>
         </a-assets>
 
-        <!-- Hiro 마커 및 핸들러 추가 -->
-        <a-marker preset="hiro" marker-handler>
+        <a-marker preset="hiro" smooth="true" smoothCount="5">
             <!-- 첫 번째 캐릭터 (시작점) -->
-            <a-box class="ar-object" position="0 0.5 0" color="red" scale="0.3 0.3 0.3"></a-box>
+            <a-box position="0 0.5 0" color="red" scale="0.3 0.3 0.3" 
+                   animation="property: rotation; to: 0 360 0; loop: true; dur: 5000"></a-box>
             
             <!-- 경로를 따라 배치된 캐릭터들 -->
-            <a-box class="ar-object" position="1 0.5 0" color="blue" scale="0.3 0.3 0.3"></a-box>
-            <a-box class="ar-object" position="2 0.5 0" color="green" scale="0.3 0.3 0.3"></a-box>
-            <a-box class="ar-object" position="3 0.5 1" color="yellow" scale="0.3 0.3 0.3"></a-box>
-            <a-box class="ar-object" position="4 0.5 2" color="purple" scale="0.3 0.3 0.3"></a-box>
+            <a-box position="1 0.5 0" color="blue" scale="0.3 0.3 0.3"
+                   animation="property: position; dir: alternate; dur: 1000; easing: easeInOutSine; loop: true; to: 1 1 0"></a-box>
+            <a-box position="2 0.5 0" color="green" scale="0.3 0.3 0.3"
+                   animation="property: rotation; to: 360 360 0; loop: true; dur: 3000"></a-box>
+            <a-box position="3 0.5 1" color="yellow" scale="0.3 0.3 0.3"
+                   animation="property: scale; dir: alternate; dur: 1000; easing: easeInOutSine; loop: true; to: 0.4 0.4 0.4"></a-box>
+            <a-box position="4 0.5 2" color="purple" scale="0.3 0.3 0.3"></a-box>
             
             <!-- 목적지 표시 -->
-            <a-box class="ar-object" position="5 0.5 2" color="red" scale="0.5 0.5 0.5"></a-box>
+            <a-box position="5 0.5 2" color="red" scale="0.5 0.5 0.5"
+                   animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"></a-box>
         </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+        window.addEventListener('load', function () {
+            const scene = document.querySelector('a-scene');
+            
+            scene.addEventListener('loaded', function () {
+                const loader = document.querySelector('.arjs-loader');
+                loader.style.display = 'none';
+            });
+
+            scene.addEventListener('camera-error', function (error) {
+                const loader = document.querySelector('.arjs-loader');
+                loader.innerHTML = `
+                    <div>
+                        카메라 접근 오류:<br>
+                        카메라 권한을 허용해주세요.<br>
+                        페이지를 새로고침 해주세요.
+                    </div>
+                `;
+            });
+        });
+    </script>
 </body>
 </html>
