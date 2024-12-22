@@ -1,64 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebXR with 3D Character</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR.js with GLTF Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-webxr-controller.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-ar.js@1.0.0/dist/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
+        a-scene { height: 100vh; }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs="sourceType: webcam;" xr-scene>
-        <!-- 모델을 로드할 수 있는 a-assets -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
         <a-assets>
-            <a-asset-item 
-                id="3d-model" 
-                src="orio.gltf"  
-            ></a-asset-item>
+            <a-asset-item id="3d-model" src="orio.gltf"></a-asset-item>
         </a-assets>
+        
+        <!-- Hiro Marker -->
+        <a-marker preset="hiro" id="hiro-marker">
+            <a-entity id="model" gltf-model="#3d-model" scale="0.5 0.5 0.5" position="0 0 0" rotation="-45 0 0"></a-entity>
+        </a-marker>
 
-        <!-- 카메라 설정 -->
+        <!-- Create a persistent 3D model once the marker is detected -->
+        <a-entity id="persistent-model" visible="false" gltf-model="#3d-model" scale="0.5 0.5 0.5" position="0 0 0" rotation="-45 0 0"></a-entity>
+
         <a-entity camera></a-entity>
-
-        <!-- 3D 모델 -->
-        <a-entity 
-            id="3d-character"
-            gltf-model="#3d-model"
-            position="0 0 -2"  
-            scale="0.5 0.5 0.5"  
-            rotation="0 0 0"    
-            animation="property: rotation; to: 0 360 0; dur: 10000; loop: true;"
-        ></a-entity>
-
-        <!-- AR 버튼을 누르면 AR 모드 활성화 -->
-        <a-entity 
-            id="ar-button"
-            position="0 0 -1.5"
-            geometry="primitive: plane; width: 2; height: 1;"
-            material="color: #00FF00"
-            text="value: Start AR; align: center; color: white; width: 4;"
-            event-set__mouseenter="scale: 1.1 1.1 1"
-            event-set__mouseleave="scale: 1 1 1"
-            class="clickable"
-            onclick="startAR()"
-        ></a-entity>
     </a-scene>
 
     <script>
-        // AR 모드 시작 함수
-        function startAR() {
-            const scene = document.querySelector('a-scene');
-            const xrSession = scene.enterXR({ immersive: true, requiredFeatures: ['local'] });
-            xrSession.then(() => {
-                console.log('AR 모드 활성화됨!');
-                document.getElementById('ar-button').setAttribute('visible', 'false'); // AR 모드 시작 후 버튼 숨기기
-            }).catch(err => {
-                console.error('AR 세션 시작 실패:', err);
-            });
-        }
+        // Initialize AR.js marker tracking and model behavior
+        const marker = document.querySelector('#hiro-marker');
+        const persistentModel = document.querySelector('#persistent-model');
+        const model = document.querySelector('#model');
+        
+        // Listen for marker detection
+        marker.addEventListener('markerFound', function() {
+            // When the marker is found, we position the persistent model at the same location
+            const markerPosition = model.getAttribute('position');
+            persistentModel.setAttribute('visible', true);
+            persistentModel.setAttribute('position', markerPosition);
+
+            // Hide the marker-based model after it is found
+            model.setAttribute('visible', false);
+        });
+
+        marker.addEventListener('markerLost', function() {
+            // The model remains in the same position even after the marker is lost
+            // No action needed because the persistent model is already visible and stationary
+        });
     </script>
 </body>
 </html>
