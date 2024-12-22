@@ -2,24 +2,34 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=0.01">
-  <title>AR.js 예제</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebAR Example - Hiro Marker</title>
+  <!-- AR.js 라이브러리 로드 -->
   <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/AR.js/aframe/build/aframe-ar.js"></script>
+  
   <style>
     body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
+    a-scene { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
+  <!-- A-Frame을 사용하여 AR 씬을 설정 -->
   <a-scene embedded arjs>
-    <!-- Hiro 마커를 기준으로 3D 오브젝트를 배치 -->
+    <!-- Hiro 마커를 지정 -->
     <a-marker preset="hiro">
-      <a-box position="0 0.5 0" material="color: red;"></a-box>
+      <!-- 3D 오브젝트를 마커 위에 배치 -->
+      <a-entity 
+        position="0 0 0" 
+        geometry="primitive: box; depth: 1; height: 1; width: 1" 
+        material="color: red">
+      </a-entity>
     </a-marker>
 
     <!-- 카메라 설정 -->
     <a-entity camera></a-entity>
   </a-scene>
+
+  <!-- AR.js 설정: 카메라 URL을 통해 모바일 카메라를 자동으로 접근 -->
 </body>
 </html>
