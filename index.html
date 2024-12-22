@@ -1,53 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR.js with GLTF Model</title>
+    <title>AR.js with Fixed GLTF Model</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ar.js/2.2.2/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        a-scene { height: 100vh; }
     </style>
 </head>
 <body>
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+    <a-scene 
+        embedded 
+        arjs="sourceType: webcam; debugUIEnabled: true;" 
+        vr-mode-ui="enabled: false"
+    >
         <a-assets>
-            <a-asset-item id="3d-model" src="orio.gltf"></a-asset-item>
+            <a-asset-item 
+                id="3d-model" 
+                src="orio.gltf"
+            ></a-asset-item>
         </a-assets>
-        
-        <!-- Hiro Marker -->
+
         <a-marker preset="hiro" id="hiro-marker">
-            <a-entity id="model" gltf-model="#3d-model" scale="0.5 0.5 0.5" position="0 0 0" rotation="-45 0 0"></a-entity>
+            <a-entity 
+                gltf-model="#3d-model"
+                scale="0.5 0.5 0.5"
+                position="0 0 1" 
+                rotation="-45 0 0"
+                static-body 
+            ></a-entity>
         </a-marker>
 
-        <!-- Create a persistent 3D model once the marker is detected -->
-        <a-entity id="persistent-model" visible="false" gltf-model="#3d-model" scale="0.5 0.5 0.5" position="0 0 0" rotation="-45 0 0"></a-entity>
+        <a-entity id="fixed-model" 
+                  gltf-model="#3d-model"
+                  scale="0.5 0.5 0.5"
+                  position="0 0 -1"
+                  rotation="0 0 0"
+                  visible="false"  
+                  static-body
+        ></a-entity>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // Initialize AR.js marker tracking and model behavior
-        const marker = document.querySelector('#hiro-marker');
-        const persistentModel = document.querySelector('#persistent-model');
-        const model = document.querySelector('#model');
-        
-        // Listen for marker detection
-        marker.addEventListener('markerFound', function() {
-            // When the marker is found, we position the persistent model at the same location
-            const markerPosition = model.getAttribute('position');
-            persistentModel.setAttribute('visible', true);
-            persistentModel.setAttribute('position', markerPosition);
+        let marker = document.querySelector('#hiro-marker');
+        let fixedModel = document.querySelector('#fixed-model');
 
-            // Hide the marker-based model after it is found
-            model.setAttribute('visible', false);
+        marker.addEventListener('markerFound', function() {
+            fixedModel.setAttribute('visible', true);
         });
 
         marker.addEventListener('markerLost', function() {
-            // The model remains in the same position even after the marker is lost
-            // No action needed because the persistent model is already visible and stationary
+            fixedModel.setAttribute('visible', false);
         });
     </script>
 </body>
