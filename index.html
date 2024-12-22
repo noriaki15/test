@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <title>WebXR with 3D Character</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/aframe-ar.js@1.0.0/dist/aframe-ar.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aframe-webxr-controller.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-ar.js@1.0.0/dist/aframe-ar.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
     </style>
 </head>
 <body>
-    <a-scene embedded xr-scene>
+    <a-scene embedded arjs="sourceType: webcam;" xr-scene>
+        <!-- 모델을 로드할 수 있는 a-assets -->
         <a-assets>
             <a-asset-item 
                 id="3d-model" 
@@ -19,16 +20,45 @@
             ></a-asset-item>
         </a-assets>
 
+        <!-- 카메라 설정 -->
         <a-entity camera></a-entity>
 
+        <!-- 3D 모델 -->
         <a-entity 
+            id="3d-character"
             gltf-model="#3d-model"
             position="0 0 -2"  
             scale="0.5 0.5 0.5"  
             rotation="0 0 0"    
-            animation="property: rotation; to: 0 360 0; dur: 10000; loop: true;"></a-entity>
-        
-        <a-button position="0 0 -1" text="Start AR"></a-button>
+            animation="property: rotation; to: 0 360 0; dur: 10000; loop: true;"
+        ></a-entity>
+
+        <!-- AR 버튼을 누르면 AR 모드 활성화 -->
+        <a-entity 
+            id="ar-button"
+            position="0 0 -1.5"
+            geometry="primitive: plane; width: 2; height: 1;"
+            material="color: #00FF00"
+            text="value: Start AR; align: center; color: white; width: 4;"
+            event-set__mouseenter="scale: 1.1 1.1 1"
+            event-set__mouseleave="scale: 1 1 1"
+            class="clickable"
+            onclick="startAR()"
+        ></a-entity>
     </a-scene>
+
+    <script>
+        // AR 모드 시작 함수
+        function startAR() {
+            const scene = document.querySelector('a-scene');
+            const xrSession = scene.enterXR({ immersive: true, requiredFeatures: ['local'] });
+            xrSession.then(() => {
+                console.log('AR 모드 활성화됨!');
+                document.getElementById('ar-button').setAttribute('visible', 'false'); // AR 모드 시작 후 버튼 숨기기
+            }).catch(err => {
+                console.error('AR 세션 시작 실패:', err);
+            });
+        }
+    </script>
 </body>
 </html>
