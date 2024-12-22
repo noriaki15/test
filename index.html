@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebAR Example - Hiro Marker</title>
   <!-- AR.js 라이브러리 로드 -->
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/AR.js/aframe/build/aframe-ar.js"></script>
   
   <style>
@@ -17,14 +17,13 @@
   <!-- A-Frame을 사용하여 AR 씬을 설정 -->
   <a-scene embedded arjs>
     <!-- Hiro 마커를 지정 -->
-    <a-marker preset="hiro">
-      <!-- 3D 오브젝트를 마커 위에 배치 -->
-      <a-entity 
-        position="0 0 0" 
-        geometry="primitive: box; depth: 1; height: 1; width: 1" 
-        material="color: red">
-      </a-entity>
-    </a-marker>
+<a-marker preset="hiro">
+  <a-entity 
+    position="1 1 1"
+    scale="0.1 0.1 0.1"
+    gltf-model="orio.gltf">
+  </a-entity>
+</a-marker>
 
     <!-- 카메라 설정 -->
     <a-entity camera></a-entity>
