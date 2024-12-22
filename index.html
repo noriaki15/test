@@ -15,21 +15,50 @@
         arjs='sourceType: webcam; debugUIEnabled: false;' 
         vr-mode-ui="enabled: false"
     >
+        <!-- 모델의 GLTF 파일을 로드 -->
         <a-assets>
             <a-asset-item 
                 id="3d-model" 
                 src="orio.gltf"
             ></a-asset-item>
         </a-assets>
-        <a-marker preset="hiro">
+
+        <!-- Hiro 마커를 통해 모델을 배치 -->
+        <a-marker preset="hiro" id="hiro-marker">
+            <!-- 모델은 마커가 인식될 때만 나타나도록 설정 -->
             <a-entity 
+                id="3d-object"
                 gltf-model="#3d-model"
                 scale="0.5 0.5 0.5"
                 position="0 0 0"
                 rotation="-45 0 0"
             ></a-entity>
         </a-marker>
+
+        <!-- 카메라 설정 -->
         <a-entity camera></a-entity>
     </a-scene>
+
+    <script>
+        // A-Frame과 AR.js를 통해 마커가 인식되었을 때의 동작을 처리
+        var scene = document.querySelector('a-scene');
+        var marker = document.querySelector('#hiro-marker');
+        var object = document.querySelector('#3d-object');
+        var isObjectPlaced = false;
+
+        marker.addEventListener('markerFound', function () {
+            if (!isObjectPlaced) {
+                // 마커가 감지되면 3D 객체의 위치를 저장하고 표시
+                var position = marker.object3D.position;
+                object.setAttribute('position', position);
+                isObjectPlaced = true;
+            }
+        });
+
+        marker.addEventListener('markerLost', function () {
+            // 마커가 사라져도, 이미 생성된 3D 객체는 남도록 설정
+            // 추가적인 로직을 넣을 수 있습니다. (여기서는 그냥 남기기만 합니다)
+        });
+    </script>
 </body>
 </html>
