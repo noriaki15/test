@@ -1,55 +1,70 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Location-based AR.js demo</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPS AR Experience</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
     <style>
-      #debug {
-        position: fixed;
-        z-index: 10000;
-        background-color: #fff;
-        padding: 10px;
-        top: 0;
-        left: 0;
-        display: block;
-      }
+        body { margin: 0; overflow: hidden; }
+        #distanceText {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 20px;
+            z-index: 100;
+        }
     </style>
-  </head>
+</head>
+<body>
 
-  <body style="margin: 0; overflow: hidden;">
-    <div id="debug"></div>
-    <a-scene
-      vr-mode-ui="enabled: false"
-      embedded
-      arjs="sourceType: webcam; debugUIEnabled: false;"
-    >
-      <a-box
-        material="color: red"
-        gps-entity-place="latitude: 33.84403934336747; longitude: 130.87759205386976;"
-        scale="15 15 15"
-      ></a-box>
-      <a-text
-        id="text"
-        value=""
-        look-at="[gps-camera]"
-        scale="30 30 30"
-        position="0 55 0"
-        gps-entity-place="latitude: 33.84403934336747; longitude: 130.87759205386976;"
-      ></a-text>
-      <a-camera gps-camera rotation-reader> </a-camera>
+    <div id="distanceText">Calculating distance...</div>
+
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        <a-entity id="destinationModel" gps-entity-place="latitude: 37.7749; longitude: -122.4194;" 
+                  gltf-model="orio.gltf" scale="1 1 1" 
+                  rotation="-45 0 0">
+        </a-entity>
+
+        <a-camera gps-camera rotation-reader></a-camera>
     </a-scene>
+
     <script>
-      window.addEventListener('load', () => {
-        const text = document.getElementById('text');
-        text.addEventListener('gps-entity-place-update-positon', (event) => {
-          document.getElementById('debug').textContent = `あと${event.detail.distance}m`;
-          text.setAttribute('value', text.getAttribute('distanceMsg') + ' left');
-        });
-      });
+        const destinationLatitude = 33.88831;
+        const destinationLongitude = 130.71134;
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c * 1000;
+            return distance;
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.watchPosition(function(position) {
+                const userLatitude = position.coords.latitude;
+                const userLongitude = position.coords.longitude;
+
+                const distance = calculateDistance(userLatitude, userLongitude, destinationLatitude, destinationLongitude);
+
+                document.getElementById('distanceText').innerText = `Distance: ${distance.toFixed(2)} meters`;
+
+            }, function(error) {
+                console.log(error);
+            }, {
+                enableHighAccuracy: true
+            });
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
     </script>
-  </body>
+
+</body>
 </html>
