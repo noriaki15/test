@@ -1,70 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.01">
-    <title>GPS AR Experience</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        #distanceText {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            font-size: 20px;
-            z-index: 100;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="distanceText">Calculating distance...</div>
-
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-        <a-entity id="destinationModel" gps-entity-place="latitude: 33.88831; longitude: 130.71134;" 
-                  gltf-model="orio.gltf" scale="1 1 1" 
-                  rotation="-45 0 0">
-        </a-entity>
-
-        <a-camera gps-camera rotation-reader></a-camera>
-    </a-scene>
+    <title>AR GPS Location Based</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.01, user-scalable=no">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
     <script>
-        const destinationLatitude = 33.88831;
-        const destinationLongitude = 130.71134;
+        AFRAME.registerComponent('distance-check', {
+            init: function() {
+                this.target = {
+                    lat: 33.8883,
+                    lon: 130.7113
+                };
+                
+                this.distanceText = document.querySelector('#distanceText');
+                this.updateDistance = this.updateDistance.bind(this);
+                
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.watchPosition(this.updateDistance);
+                }
+            },
 
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            const distance = R * c * 1000;
-            return distance;
-        }
+            updateDistance: function(position) {
+                const currentLat = position.coords.latitude;
+                const currentLon = position.coords.longitude;
+                
+                const R = 6371;
+                const dLat = this.toRad(this.target.lat - currentLat);
+                const dLon = this.toRad(this.target.lon - currentLon);
+                const lat1 = this.toRad(currentLat);
+                const lat2 = this.toRad(this.target.lat);
 
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(function(position) {
-                const userLatitude = position.coords.latitude;
-                const userLongitude = position.coords.longitude;
+                const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                        Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                const distance = R * c;
 
-                const distance = calculateDistance(userLatitude, userLongitude, destinationLatitude, destinationLongitude);
+                let distanceDisplay;
+                if (distance >= 1) {
+                    distanceDisplay = `${distance.toFixed(2)} km`;
+                } else {
+                    distanceDisplay = `${(distance * 1000).toFixed(0)} m`;
+                }
 
-                document.getElementById('distanceText').innerText = `Distance: ${distance.toFixed(2)} meters`;
+                this.distanceText.setAttribute('value', `距離: ${distanceDisplay}`);
+            },
 
-            }, function(error) {
-                console.log(error);
-            }, {
-                enableHighAccuracy: true
-            });
-        } else {
-            console.log("Geolocation is not supported by this browser.");
-        }
+            toRad: function(degree) {
+                return degree * Math.PI / 180;
+            }
+        });
     </script>
+</head>
 
+<body style="margin: 0; overflow: hidden;">
+    <a-scene
+        vr-mode-ui="enabled: false"
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;">
+
+        <a-camera gps-camera rotation-reader>
+        </a-camera>
+
+        <a-box
+            gps-entity-place="latitude: 33.8883; longitude: 130.7113"
+            position="0 0 0"
+            scale="1 1 1"
+            material="color: red"
+            distance-check>
+        </a-box>
+
+        <a-text
+            id="distanceText"
+            value="Loading..."
+            scale="1 1 1"
+            align="center"
+            position="0 1.5 0"
+            rotation="0 0 0"
+            gps-entity-place="latitude: 33.8883; longitude: 130.7113">
+        </a-text>
+
+    </a-scene>
 </body>
 </html>
