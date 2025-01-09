@@ -13,17 +13,11 @@
               debugUIEnabled: false;">
         
         <!-- 사용자 위치를 기준으로 GPS 요소를 활성화 -->
-        <a-entity gps-entity-place="latitude: 33.89072; longitude: 130.71128;">
-            <!-- 3D 모델 또는 기본 기하학적 모양 -->
-            <a-box 
-                color="red" 
-                depth="1" 
-                height="1" 
-                width="1" 
-                scale="2 2 2"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-            </a-box>
-        </a-entity>
+        <a-entity 
+            gps-entity-place="latitude: 33.89072; longitude: 130.71128;"
+            gltf-model="orio.gltf"
+            scale="1 1 1">
+         </a-entity>
         
         <!-- 사용자의 위치를 시각적으로 나타내는 카메라 -->
         <a-camera gps-camera rotation-reader></a-camera>
