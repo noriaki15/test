@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AR.js GPS 거리 표시</title>
+    <title>AR.js 간단한 거리 계산</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/jeromeetienne/ar.js/aframe/build/aframe-ar.min.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
     <a-scene 
         embedded 
-        arjs="sourceType: webcam; 
-              gpsMinAccuracy: 100; 
-              debugUIEnabled: false;">
+        arjs="sourceType: webcam; gpsMinAccuracy: 100; debugUIEnabled: false;">
         
-        <!-- 캐릭터 모델 -->
+        <!-- 캐릭터 -->
         <a-entity 
             gps-entity-place="latitude: 33.890910; longitude: 130.711773;"
             gltf-model="orio.gltf"
@@ -21,50 +19,40 @@
 
         <!-- 거리 텍스트 -->
         <a-entity 
+            id="distance-text"
             gps-entity-place="latitude: 33.890910; longitude: 130.711773;"
-            text="value: ; align: center; color: white; width: 5"
-            position="0 2 0"
-            id="distance-text">
+            text="value: Calculating distance...; align: center; color: blue;"
+            scale="10 10 10">
         </a-entity>
 
+        <!-- 카메라 -->
         <a-camera gps-camera rotation-reader></a-camera>
     </a-scene>
 
     <script>
-        // 목표 좌표
-        const targetLat = 33.890910;
-        const targetLon = 130.711773;
-
-        // 거리 계산 함수
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // 지구 반지름 (미터)
-            const toRad = (value) => (value * Math.PI) / 180;
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            const camera = document.querySelector('[gps-camera]');
+            const textEntity = document.querySelector('#distance-text');
             
-            const φ1 = toRad(lat1);
-            const φ2 = toRad(lat2);
-            const Δφ = toRad(lat2 - lat1);
-            const Δλ = toRad(lon2 - lon1);
+            // 목적지 좌표
+            const targetLat = 33.890910;
+            const targetLon = 130.711773;
 
-            const a =
-                Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                Math.cos(φ1) * Math.cos(φ2) *
-                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            // 거리 계산 함수
+            const calculateDistance = (lat1, lon1, lat2, lon2) => {
+                const latDiff = lat2 - lat1;
+                const lonDiff = lon2 - lon1;
+                return Math.sqrt(latDiff ** 2 + lonDiff ** 2) * 111139; // 1도 ≈ 111,139m
+            };
 
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c; // 거리 반환 (미터)
-        }
+            // 사용자 위치 업데이트 이벤트
+            camera.addEventListener('gps-camera-update-position', (event) => {
+                const userLat = event.detail.position.latitude;
+                const userLon = event.detail.position.longitude;
 
-        // 사용자 위치 추적
-        document.querySelector("[gps-camera]").addEventListener("gps-camera-update-position", (e) => {
-            const userLat = e.detail.position.latitude;
-            const userLon = e.detail.position.longitude;
-
-            // 거리 계산
-            const distance = calculateDistance(userLat, userLon, targetLat, targetLon);
-
-            // 거리 텍스트 업데이트
-            const distanceText = document.getElementById("distance-text");
-            distanceText.setAttribute("text", "value", `${Math.round(distance)}m 남았습니다.`);
+                const distance = calculateDistance(userLat, userLon, targetLat, targetLon);
+                textEntity.setAttribute('text', `value: Distance: ${Math.round(distance)}m; align: center; color: blue;`);
+            });
         });
     </script>
 </body>
