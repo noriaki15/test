@@ -1,105 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html>
+  <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR GPS Location Based</title>
-    
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Location-based AR.js demo</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://unpkg.com/aframe-look-at-component@0.8.0/dist/aframe-look-at-component.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+    <style>
+      #debug {
+        position: fixed;
+        z-index: 10000;
+        background-color: #fff;
+        padding: 10px;
+        top: 0;
+        left: 0;
+        display: block;
+      }
+    </style>
+  </head>
 
-    <script>
-        AFRAME.registerComponent('distance-check', {
-            init: function() {
-                this.target = {
-                    lat: 33.890729459369304,
-                    lon: 130.71128720882763
-                };
-
-                this.distanceText = document.querySelector('#distanceText');
-                this.updateDistance = this.updateDistance.bind(this);
-
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.watchPosition(this.updateDistance, this.handleError, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    });
-                }
-            },
-
-            updateDistance: function(position) {
-                const currentLat = position.coords.latitude;
-                const currentLon = position.coords.longitude;
-
-                const R = 6371;  // 지구의 반경 (킬로미터)
-                const dLat = this.toRad(this.target.lat - currentLat);
-                const dLon = this.toRad(this.target.lon - currentLon);
-                const lat1 = this.toRad(currentLat);
-                const lat2 = this.toRad(this.target.lat);
-
-                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                          Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                const distance = R * c;
-
-                let distanceDisplay;
-                if (distance >= 1) {
-                    distanceDisplay = `${distance.toFixed(2)} km`;
-                } else {
-                    distanceDisplay = `${(distance * 1000).toFixed(0)} m`;
-                }
-
-                this.distanceText.setAttribute('value', `Distance: ${distanceDisplay}`);
-
-                // 박스를 1km 이상 떨어져도 볼 수 있게 처리
-                const box = document.querySelector('#box');
-                if (distance <= 1) {
-                    box.setAttribute('visible', 'true');
-                } else {
-                    box.setAttribute('visible', 'true');
-                }
-            },
-
-            handleError: function(error) {
-                console.error('Geolocation error: ', error);
-            },
-
-            toRad: function(degree) {
-                return degree * Math.PI / 180;
-            }
-        });
-    </script>
-</head>
-
-<body style="margin: 0; overflow: hidden;">
-    <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false; videoTexture: true;">
-
-        <!-- 카메라 -->
-        <a-camera gps-camera rotation-reader></a-camera>
-
-        <!-- GPS 위치 기반 빨간 박스 -->
-        <a-box
-            id="box"
-            gps-entity-place="latitude: 33.890729459369304; longitude: 130.71128720882763"
-            position="0 0 0"
-            scale="1 1 1"
-            material="color: red"
-            distance-check>
-        </a-box>
-
-        <!-- 거리 표시 텍스트 -->
-        <a-text
-            id="distanceText"
-            value="Loading..."
-            scale="1 1 1"
-            align="center"
-            position="0 1.5 0"
-            rotation="0 0 0"
-            gps-entity-place="latitude: 33.890729459369304; longitude: 130.71128720882763">
-        </a-text>
-
+  <body style="margin: 0; overflow: hidden;">
+    <div id="debug"></div>
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      arjs="sourceType: webcam; debugUIEnabled: false;"
+    >
+      <a-box
+        material="color: red"
+        gps-entity-place="latitude: 33.89072; longitude: 130.71128;"
+        scale="15 15 15"
+      ></a-box>
+      <a-text
+        id="text"
+        value=""
+        look-at="[gps-camera]"
+        scale="30 30 30"
+        position="0 55 0"
+        gps-entity-place="latitude: 33.89072; longitude: 130.71128;"
+      ></a-text>
+      <a-camera gps-camera rotation-reader> </a-camera>
     </a-scene>
-</body>
+    <script>
+      window.addEventListener('load', () => {
+        const text = document.getElementById('text');
+        text.addEventListener('gps-entity-place-update-positon', (event) => {
+          document.getElementById('debug').textContent = `あと${event.detail.distance}m`;
+          text.setAttribute('value', text.getAttribute('distanceMsg') + ' left');
+        });
+      });
+    </script>
+  </body>
 </html>
