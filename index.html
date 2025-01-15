@@ -11,14 +11,14 @@
         arjs="sourceType: webcam; gpsMinAccuracy: 1000; debugUIEnabled: false;">
         
         <a-entity 
-            gps-entity-place="latitude: 33.84364852850469; longitude: 130.8783833147811;"
+            gps-entity-place="latitude: 33.88831; longitude: 130.71064;"
             gltf-model="orio.gltf"
             scale="1 1 1">
         </a-entity>
 
         <a-entity 
             id="distance-text"
-            gps-entity-place="latitude: 33.84364852850469; longitude: 130.8783833147811;"
+            gps-entity-place="latitude: 33.88831; longitude: 130.71064;"
             text="value: Calculating distance...; align: center; color: blue;"
             scale="50 50 50">
         </a-entity>
@@ -27,8 +27,8 @@
     </a-scene>
 
     <script>
-        const targetLat = 33.84364852850469;
-        const targetLon = 130.8783833147811;
+        const targetLat = 33.88831;
+        const targetLon = 130.71064;
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3; 
